@@ -1,6 +1,6 @@
 # MediCare Hospital — Laravel API
 
-Laravel 13, Sanctum, PHP 8.3+, and MySQL. The Admin and Doctor portals use real database records. Patient, laboratory processing, and pharmacy dispensing portals remain for subsequent phases.
+Laravel 13, Sanctum, PHP 8.3+, and MySQL. The Admin, Doctor, and Patient portals use real database records. Laboratory processing and pharmacy dispensing portals remain for subsequent phases.
 
 ## Installation
 
@@ -49,6 +49,25 @@ Create an active user with role `doctor` through Admin → Users & Access, then 
 Doctor role defaults allow schedule management and clinical work when no custom permission list is configured (`null` or `[]`). A nonempty custom list limits writes to the selected `manage_schedules` / `manage_consultations` permissions. Professional status must be `active` for clinical writes; schedule management remains available while on leave.
 
 Doctor routes are under `/api/doctor`: `dashboard`, `profile`, `options`, paginated `schedules`, `appointments`, `patients`, `consultations`, `prescriptions`, and `lab-requests`. Schedule CRUD uses its resource endpoints. `POST consultations` finalizes an appointment; `POST/PUT prescriptions` issues/updates prescriptions; `POST lab-requests` accepts a consultation and `test_type_ids[]`. Cancellation endpoints use `POST prescriptions/{id}/cancel` and `POST lab-requests/{id}/cancel`. `GET lab-reports/{id}/download` and `GET prescriptions/{id}/download` serve authorized files. Patient allergy/history entries use `POST patients/{id}/allergies` and `POST patients/{id}/medical-history`.
+
+## Patient functionality
+
+Patients can register through the public registration form, which creates an active Patient account and linked profile, assigns a unique patient number, and sends a welcome notification. Admin can also create a Patient user and link its profile. A patient account without a linked profile receives a configuration message.
+
+- Personal dashboard calculated from owned database records, with appointment statistics, current prescriptions, completed laboratory reports, and outstanding balances.
+- Browse active departments, specializations, doctors, fees, and weekly consultation schedules. Choose a date and an available slot. All times use the configured hospital timezone.
+- New bookings are `pending` until confirmed by the doctor. Patient rescheduling also returns an appointment to `pending`. Only pending/confirmed appointments that have not started may be rescheduled or cancelled. Cancellation requires a reason and frees the slot.
+- Admin and Patient booking use the same transaction and row-locking service to validate schedules and prevent slot conflicts. Available-slot responses are advisory; submission checks availability again. Patient identity and status are derived on the backend.
+- View only the patient's own consultation records, recorded allergies, medical history, admissions, prescriptions, laboratory requests, invoices, and payments. Patients cannot modify clinical notes, prescribe medicines, process laboratory tests, change invoice balances, or record their own payments.
+- Completed laboratory findings and completed report files are released through authenticated, ownership-checked endpoints. Preliminary findings, private file paths, staff account details, and other patients' records are excluded from Patient API resources.
+- Download prescription and invoice PDFs. Billing is read-only in the Patient portal; authorized hospital staff record payments. No payment gateway is connected.
+- Update personal profile, emergency contacts, contact details, and password. Clinical history and patient/account identifiers remain protected.
+
+Patient role defaults permit all Patient functions when no custom permission list is set. Nonempty custom lists are enforced using `view_own_records`, `book_appointments`, `view_prescriptions`, and `view_invoices`. Role restrictions and ownership policies apply independently of permissions.
+
+Patient routes use `/api/patient`: `dashboard`, `profile` (GET/PUT), `history`, `directory`, paginated `doctors`, `doctors/{id}/slots?date=YYYY-MM-DD`, `appointments`, `consultations`, `prescriptions`, `lab-tests`, `admissions`, `invoices`, and `payments`. Use `POST appointments` to request a slot, `PUT appointments/{id}` to reschedule, and `POST appointments/{id}/cancel` with `cancellation_reason` to cancel. Download routes are `prescriptions/{id}/download`, `lab-reports/{id}/download`, and `invoices/{id}/download`. Shared `/api/notifications` endpoints return only the authenticated user's notifications.
+
+This phase needs no additional migration and does not reset the configured MySQL database. Patient feature tests use isolated databases and cover role restrictions, record ownership, slot validation, booking/cancellation/rescheduling, clinical and financial read restrictions, private downloads, profile validation, and the Patient-to-Doctor consultation flow.
 
 ## API
 

@@ -72,6 +72,7 @@ const ROLE_NAV_ITEMS = {
     { label: 'Prescriptions', path: '/patient/prescriptions' },
     { label: 'Lab Reports', path: '/patient/lab-reports' },
     { label: 'Invoices & Payments', path: '/patient/invoices' },
+    { label: 'My Profile', path: '/patient/profile' },
   ],
   lab_tech: [
     { label: 'Dashboard', path: '/lab/dashboard' },
@@ -278,10 +279,10 @@ export const DashboardLayout = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1.5 }, flexShrink: 0 }}>
             <TextField
               size="small"
-              placeholder="Search patients…"
+              placeholder={role === 'patient' ? 'Search doctors…' : 'Search patients…'}
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && ['admin','doctor'].includes(role)) navigate(`/${role}/patients?search=${encodeURIComponent(globalSearch)}`); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { if (role === 'patient') navigate(`/patient/book-appointment?search=${encodeURIComponent(globalSearch)}`); else if (['admin','doctor'].includes(role)) navigate(`/${role}/patients?search=${encodeURIComponent(globalSearch)}`); }; }}
               slotProps={{ input: {
                 startAdornment: (
                   <InputAdornment position="start">
@@ -366,7 +367,7 @@ export const DashboardLayout = () => {
                 </Typography>
               </Box>
               <Divider />
-              <MenuItem onClick={() => { setAvatarAnchor(null); navigate(['admin','doctor'].includes(role) ? `/${role}/profile` : `/${role}/dashboard`); }}>
+              <MenuItem onClick={() => { setAvatarAnchor(null); navigate(['admin','doctor','patient'].includes(role) ? `/${role}/profile` : `/${role}/dashboard`); }}>
                 <PersonIcon sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} /> Profile Info
               </MenuItem>
               <MenuItem onClick={handleLogout} sx={{ color: brandColors.coral.main }}>

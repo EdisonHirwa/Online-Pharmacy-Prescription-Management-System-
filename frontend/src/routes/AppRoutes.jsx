@@ -23,13 +23,14 @@ import NotFoundPage from '../pages/shared/NotFoundPage';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminWorkspace from '../pages/admin/AdminWorkspace';
 import ProfilePage from '../pages/shared/ProfilePage';
-import PatientsPage from '../pages/admin/PatientsPage';
-import BillingPage from '../pages/admin/BillingPage';
 
 import DoctorDashboard from '../pages/doctor/DoctorDashboard';
 import DoctorWorkspace from '../pages/doctor/DoctorWorkspace';
 import DoctorProfilePage from '../pages/doctor/DoctorProfilePage';
 import PatientDashboard from '../pages/patient/PatientDashboard';
+import BookAppointmentPage from '../pages/patient/BookAppointmentPage';
+import PatientRecordsPage from '../pages/patient/PatientRecordsPage';
+import PatientProfilePage from '../pages/patient/PatientProfilePage';
 import LabDashboard from '../pages/lab/LabDashboard';
 import PharmacyDashboard from '../pages/pharmacy/PharmacyDashboard';
 
@@ -125,12 +126,14 @@ export const AppRoutes = () => {
       >
         <Route index element={<Navigate to="/patient/dashboard" replace />} />
         <Route path="dashboard" element={<PatientDashboard />} />
-        <Route path="book-appointment" element={<PatientDashboard />} />
-        <Route path="appointments" element={<PatientDashboard />} />
-        <Route path="medical-records" element={<PatientsPage />} />
-        <Route path="prescriptions" element={<PharmacyDashboard />} />
-        <Route path="lab-reports" element={<PatientDashboard />} />
-        <Route path="invoices" element={<BillingPage />} />
+        <Route path="book-appointment" element={<BookAppointmentPage />} />
+        <Route path="doctors" element={<BookAppointmentPage />} />
+        <Route path="appointments" element={<PatientRecordsPage key="patient-appointments" resources={['appointments']} />} />
+        <Route path="medical-records" element={<PatientRecordsPage key="patient-medical" medical resources={['consultations','admissions']} />} />
+        <Route path="prescriptions" element={<PatientRecordsPage key="patient-prescriptions" resources={['prescriptions']} />} />
+        <Route path="lab-reports" element={<PatientRecordsPage key="patient-laboratory" resources={['lab-tests']} />} />
+        <Route path="invoices" element={<PatientRecordsPage key="patient-billing" resources={['invoices','payments']} />} />
+        <Route path="profile" element={<PatientProfilePage />} />
       </Route>
 
       {/* LAB TECHNICIAN PORTAL */}

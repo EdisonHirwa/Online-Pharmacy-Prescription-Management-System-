@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\HospitalActivity;
 use App\Http\Requests\LoginRequest;
 use App\Models\LoginAttempt;
 use App\Models\Patient;
@@ -32,6 +33,7 @@ class AuthController extends Controller
             $user = User::create(collect($data)->only(['name', 'email', 'phone_number', 'password'])->all() + ['role' => 'patient', 'account_status' => 'active']);
             Patient::create(collect($data)->only(['date_of_birth', 'gender', 'blood_group', 'address', 'emergency_contact_name', 'emergency_contact_phone'])->all() + ['user_id' => $user->id, 'patient_number' => 'PAT-'.Str::ulid()]);
             AuditService::record('registered', 'users', $user->id, null, $user->id);
+            HospitalActivity::dispatch($user, 'Welcome to your patient portal', 'Your account and patient profile have been created successfully.', 'registration');
 
             return $user;
         });

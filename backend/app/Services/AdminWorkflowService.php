@@ -5,8 +5,6 @@ namespace App\Services;
 use App\Events\HospitalActivity;
 use App\Models\Admission;
 use App\Models\Appointment;
-use App\Models\Doctor;
-use App\Models\DoctorSchedule;
 use App\Models\HospitalBed;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
@@ -14,7 +12,6 @@ use App\Models\Medicine;
 use App\Models\MedicineStockMovement;
 use App\Models\Patient;
 use App\Models\Payment;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -141,43 +138,7 @@ class AdminWorkflowService
 
     public function appointment(array $data, ?int $id = null): Appointment
     {
-        return DB::transaction(function () use ($data, $id): Appointment {
-            $doctor = Doctor::lockForUpdate()->findOrFail($data['doctor_id']);
-            $record = $id ? Appointment::lockForUpdate()->findOrFail($id) : null;
-            if ($record && (! in_array($record->status, ['pending', 'confirmed'], true) || (int) $data['patient_id'] !== $record->patient_id)) {
-                abort(409, 'Only upcoming appointments can be rescheduled for the same patient.');
-            }
-            Patient::lockForUpdate()->findOrFail($data['patient_id']);
-            if ($doctor->professional_status !== 'active' || $doctor->user->account_status !== 'active' || $doctor->department->status !== 'active' || $doctor->specialization->status !== 'active') {
-                abort(409, 'This doctor is unavailable.');
-            }
-            $date = Carbon::parse($data['appointment_date'].' '.$data['appointment_time']);
-            if ($date->isPast()) {
-                throw ValidationException::withMessages(['appointment_time' => 'Choose a future appointment time.']);
-            }
-            $schedule = DoctorSchedule::where('doctor_id', $doctor->id)->where('day_of_week', $date->format('l'))->where('is_available', true)->whereTime('start_time', '<=', $data['appointment_time'].':00')->whereTime('end_time', '>', $data['appointment_time'].':00')->first();
-            if (! $schedule) {
-                abort(409, 'The doctor has no available schedule at this time.');
-            }
-            $start = Carbon::parse($data['appointment_date'].' '.$schedule->start_time);
-            $minutes = (int) $start->diffInMinutes($date);
-            if ($minutes % $schedule->slot_duration !== 0 || $date->copy()->addMinutes($schedule->slot_duration)->greaterThan(Carbon::parse($data['appointment_date'].' '.$schedule->end_time))) {
-                abort(409, 'Choose a valid consultation slot.');
-            }
-            if (Appointment::when($id, fn ($q) => $q->where('id', '!=', $id))->where('doctor_id', $doctor->id)->whereDate('appointment_date', $data['appointment_date'])->whereTime('appointment_time', $data['appointment_time'].':00')->whereIn('status', ['pending', 'confirmed', 'completed'])->exists()) {
-                abort(409, 'This consultation slot is already booked.');
-            }
-            if (Appointment::when($id, fn ($q) => $q->where('id', '!=', $id))->where('patient_id', $data['patient_id'])->whereDate('appointment_date', $data['appointment_date'])->whereTime('appointment_time', $data['appointment_time'].':00')->whereIn('status', ['pending', 'confirmed'])->exists()) {
-                abort(409, 'The patient already has an appointment at this time.');
-            }
-            $data['appointment_time'] .= ':00';
-            $record = $record ? tap($record, fn ($record) => $record->update($data)) : Appointment::create($data + ['appointment_number' => 'APT-'.Str::ulid(), 'status' => 'confirmed']);
-            AuditService::record($id ? 'appointment_rescheduled' : 'appointment_booked', 'appointments', $record->id);
-            HospitalActivity::dispatch($record->patient->user, 'Appointment confirmed', 'Your appointment has been confirmed.', 'appointment');
-            HospitalActivity::dispatch($record->doctor->user, 'Appointment assigned', 'An appointment has been booked or rescheduled in your consultation schedule.', 'appointment');
-
-            return $record;
-        }, 3);
+        return app(AppointmentBookingService::class)->book($data, $id);
     }
 
     public function appointmentStatus(int $id, array $data): Appointment

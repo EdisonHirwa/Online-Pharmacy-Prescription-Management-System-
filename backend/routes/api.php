@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ResourceController;
 use App\Http\Controllers\Admin\WorkflowController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Doctor\DoctorController;
+use App\Http\Controllers\Patient\PatientController;
 use App\Http\Middleware\ApplyHospitalSettings;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,25 @@ Route::middleware(['auth:sanctum', 'active', ApplyHospitalSettings::class])->gro
     Route::put('auth/profile', [AuthController::class, 'profile']);
     Route::get('notifications', [WorkflowController::class, 'notifications']);
     Route::post('notifications/read', [WorkflowController::class, 'readNotifications']);
+    Route::prefix('patient')->middleware('patient')->group(function (): void {
+        $controller = PatientController::class;
+        Route::get('dashboard', [$controller, 'dashboard']);
+        Route::get('profile', [$controller, 'profile']);
+        Route::put('profile', [$controller, 'updateProfile']);
+        Route::get('history', [$controller, 'history']);
+        Route::get('directory', [$controller, 'directory']);
+        Route::get('doctors', [$controller, 'doctorList']);
+        Route::get('doctors/{id}', [$controller, 'doctorDetail'])->whereNumber('id');
+        Route::get('doctors/{id}/slots', [$controller, 'slots'])->whereNumber('id');
+        Route::post('appointments', [$controller, 'book']);
+        Route::put('appointments/{id}', [$controller, 'book'])->whereNumber('id');
+        Route::post('appointments/{id}/cancel', [$controller, 'cancel'])->whereNumber('id');
+        Route::get('prescriptions/{id}/download', [$controller, 'downloadPrescription'])->whereNumber('id');
+        Route::get('lab-reports/{id}/download', [$controller, 'downloadLab'])->whereNumber('id');
+        Route::get('invoices/{id}/download', [$controller, 'downloadInvoice'])->whereNumber('id');
+        Route::get('{resource}', [$controller, 'index']);
+        Route::get('{resource}/{id}', [$controller, 'show'])->whereNumber('id');
+    });
     Route::prefix('doctor')->middleware('doctor')->group(function (): void {
         $controller = DoctorController::class;
         Route::get('profile', [$controller, 'profile']);

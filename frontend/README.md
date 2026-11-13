@@ -19,7 +19,7 @@ Tables provide server-side search, filters, sorting, pagination, detail views, a
 
 Create a user with the correct role before linking its patient or doctor profile. Inventory begins at zero; use Adjust stock to record additions and deductions. Private laboratory reports download through the protected API.
 
-The teal, navy, and coral design and light/dark toggle are retained. Patient, Laboratory Technician, and Pharmacist interfaces remain for subsequent role-by-role backend integration; the completed Admin routes use the shared AdminWorkspace instead of the earlier mock pages.
+The teal, navy, and coral design and light/dark toggle are retained. Laboratory Technician and Pharmacist interfaces remain for subsequent role-by-role backend integration; the completed Admin routes use the shared AdminWorkspace instead of the earlier mock pages.
 
 ## Doctor portal
 
@@ -28,6 +28,16 @@ Sign in with a Doctor user linked to its professional profile by Admin. Doctor r
 Start with My Appointments: review history, confirm pending requests, then consult a confirmed appointment. Finalization requires explicit confirmation and opens the completed consultation with actions to issue a prescription or request tests. Prescriptions support multiple medicines and PDF downloads; laboratory reports download from protected endpoints. Changes persist through Laravel. Forms show validation errors and the tables provide server-side search, filters, sorting, and pagination. Dashboard and tables refresh every 30 seconds.
 
 Doctor account activation, professional assignments, license, consultation fee, and professional status are managed by Admin. Doctors can change their own contact information, password, biography, room number, and permitted schedules. Clinical write controls reflect backend permissions and professional status; Laravel independently enforces authorization.
+
+## Patient portal
+
+Patients may register and sign in directly, or use an account and Patient profile created by Admin. The dedicated Patient portal includes a live dashboard, doctor directory, slot-based appointment booking, appointment history, medical records, prescriptions, laboratory results, invoices/payment history, and profile management.
+
+Book Appointment filters by department, specialization, and doctor. Select a consultation date and a server-provided slot, then review and confirm the request. New and rescheduled appointments await doctor confirmation. Pending/confirmed appointments can be changed only before they start; cancellation asks for a reason and notifies the doctor.
+
+Medical, laboratory, and financial pages are read-only and restricted to the signed-in patient. Completed laboratory files and prescription/invoice PDFs download through protected Laravel endpoints. Payments are recorded by authorized staff. Patient contact and emergency details can be edited under My Profile; clinical history is maintained by the care team.
+
+Dashboard and record tables refresh every 30 seconds. Tables support filters, search, sorting, and pagination. Registration keeps the chosen birth date as a date string rather than converting it through UTC.
 
 ## Build
 

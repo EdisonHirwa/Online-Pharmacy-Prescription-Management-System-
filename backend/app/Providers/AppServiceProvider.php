@@ -11,6 +11,7 @@ use App\Models\Prescription;
 use App\Models\User;
 use App\Policies\DoctorRecordPolicy;
 use App\Policies\PatientPolicy;
+use App\Policies\PatientRecordPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -33,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::define('patient-record', [PatientRecordPolicy::class, 'view']);
         Gate::policy(Patient::class, PatientPolicy::class);
         foreach ([Appointment::class, Consultation::class, Prescription::class, LabTest::class, DoctorSchedule::class] as $model) {
             Gate::policy($model, DoctorRecordPolicy::class);
