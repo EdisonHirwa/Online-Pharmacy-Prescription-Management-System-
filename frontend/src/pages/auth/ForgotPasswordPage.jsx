@@ -74,7 +74,7 @@ export const ForgotPasswordPage = () => {
             Reset Password
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-            Enter your registered hospital email address to receive password recovery instructions.
+            Enter your Online Pharmacy account email address to receive password recovery instructions.
           </Typography>
 
           {successMsg && (

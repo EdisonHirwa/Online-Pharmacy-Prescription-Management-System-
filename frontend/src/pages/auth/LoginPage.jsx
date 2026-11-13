@@ -108,11 +108,11 @@ export const LoginPage = () => {
               <LocalHospital sx={{ fontSize: 22 }} />
             </Box>
             <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
-              MediCare HMS
+              Online Pharmacy
             </Typography>
           </Stack>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-            Multi-Specialty Hospital Management System
+            Prescription & Pharmacy Management
           </Typography>
 
           {sessionExpiredMessage && (

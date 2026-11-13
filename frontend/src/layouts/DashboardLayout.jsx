@@ -106,7 +106,7 @@ const getRoleTitle = (role) => {
     case 'pharmacist':
       return 'Pharmacy & Dispensing Portal';
     default:
-      return 'Hospital Management System';
+      return 'Online Pharmacy';
   }
 };
 
@@ -120,9 +120,12 @@ const getUserInitials = (name, role) => {
 
 export const DashboardLayout = () => {
   const [globalSearch, setGlobalSearch] = useState('');
-  const [hospitalName, setHospitalName] = useState('MediCare HMS');
+  const [hospitalName, setHospitalName] = useState('Online Pharmacy');
   useEffect(() => {
-    const load = () => api.get('/configuration').then((response) => setHospitalName(response.data.data.hospital_name || 'MediCare HMS')).catch(() => {});
+    const load = () => api.get('/configuration').then((response) => {
+      const configuredName = response.data.data.hospital_name;
+      setHospitalName(!configuredName || /^medicare (hospital|hms)$/i.test(configuredName.trim()) ? 'Online Pharmacy' : configuredName);
+    }).catch(() => {});
     load(); window.addEventListener('hospital:configuration-updated', load);
     return () => window.removeEventListener('hospital:configuration-updated', load);
   }, []);
@@ -364,7 +367,7 @@ export const DashboardLayout = () => {
             >
               <Box sx={{ px: 2, py: 1 }}>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {user?.name || 'MediCare User'}
+                  {user?.name || 'Online Pharmacy User'}
                 </Typography>
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                   {user?.email}
