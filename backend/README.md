@@ -1,6 +1,6 @@
 # MediCare Hospital — Laravel API
 
-Laravel 13, Sanctum, PHP 8.3+, and MySQL. The Admin, Doctor, and Patient portals use real database records. Laboratory processing and pharmacy dispensing portals remain for subsequent phases.
+Laravel 13, Sanctum, PHP 8.3+, and MySQL. The Admin, Doctor, Patient, and Laboratory Technician portals use real database records. Pharmacy dispensing remains for a subsequent phase.
 
 ## Installation
 
@@ -112,3 +112,12 @@ vendor/bin/pint --dirty --format agent
 ```
 
 Tests use an isolated in-memory SQLite database and do not reset development MySQL records. The Admin feature tests cover authentication, role restrictions, CRUD and validation, protected history, schedules, appointment conflicts and rescheduling, admissions, payments, stock, reports, recovery, and notifications. Build the frontend with `npm run build` from `frontend`.
+
+
+## Laboratory Technician portal
+
+Create an active `lab_tech` user in Admin → Users & Access, then sign in normally. No separate technician profile is needed. Empty/default permissions grant the role workflow; a custom permission list must include `manage_laboratory` to enable changes.
+
+The `/api/laboratory` endpoints provide live dashboard counts, investigation filters/search/sorting/pagination, and the requested → assigned → processing → completed workflow. Technicians claim requests themselves and can release unstarted assignments. Records assigned to other technicians are inaccessible. Draft findings and preliminary reports remain private until completion; finalization notifies the requesting doctor and patient. Completed records and reports are read-only. Investigation charges are created by the existing Doctor request workflow and are not duplicated on completion.
+
+Upload PDF, JPEG, or PNG reports up to 2 MB each while processing. Extension, detected MIME type, and size are validated. Reports use randomized private storage paths with authenticated preview/download endpoints; raw paths are excluded from responses. Draft files can be removed before finalization. Assignment and result changes, file access, and denied record access are audited. Upload metadata failures remove the newly stored file.

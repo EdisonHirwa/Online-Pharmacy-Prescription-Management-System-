@@ -46,3 +46,10 @@ npm run build
 ```
 
 Build output is written to `dist/`. Host with SPA route fallback and configure the API origin when deploying separately.
+
+
+## Laboratory Technician portal
+
+Sign in with an active `lab_tech` account created by Admin. The portal includes a database-backed dashboard, Investigation Queue, My Work, Reports & Uploads, Completed History, and My Profile. Counts and lists refresh every 30 seconds; lists support search, filters, sorting, and pagination.
+
+Claim a request, open My Work, start processing, and enter findings. Save drafts and optionally attach PDF/JPEG/PNG reports up to 2 MB each, with preview, upload progress, and protected downloads. Review & finalize publishes results to the doctor and patient after confirmation. Completed findings and files are read-only. A custom account permission list must include `manage_laboratory` for editing; otherwise the portal is read-only.

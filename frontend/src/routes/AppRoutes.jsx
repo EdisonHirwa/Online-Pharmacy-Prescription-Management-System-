@@ -32,6 +32,7 @@ import BookAppointmentPage from '../pages/patient/BookAppointmentPage';
 import PatientRecordsPage from '../pages/patient/PatientRecordsPage';
 import PatientProfilePage from '../pages/patient/PatientProfilePage';
 import LabDashboard from '../pages/lab/LabDashboard';
+import LaboratoryWorkspace from '../pages/lab/LaboratoryWorkspace';
 import PharmacyDashboard from '../pages/pharmacy/PharmacyDashboard';
 
 export const AppRoutes = () => {
@@ -149,9 +150,11 @@ export const AppRoutes = () => {
       >
         <Route index element={<Navigate to="/lab/dashboard" replace />} />
         <Route path="dashboard" element={<LabDashboard />} />
-        <Route path="queue" element={<LabDashboard />} />
-        <Route path="process" element={<LabDashboard />} />
-        <Route path="reports" element={<LabDashboard />} />
+        <Route path="queue" element={<LaboratoryWorkspace key="lab-queue" mode="queue" />} />
+        <Route path="process" element={<LaboratoryWorkspace key="lab-work" mode="work" />} />
+        <Route path="reports" element={<LaboratoryWorkspace key="lab-reports" mode="reports" />} />
+        <Route path="history" element={<LaboratoryWorkspace key="lab-history" mode="history" />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
 
       {/* PHARMACIST PORTAL */}

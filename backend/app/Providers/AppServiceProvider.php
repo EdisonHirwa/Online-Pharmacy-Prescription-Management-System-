@@ -10,6 +10,7 @@ use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\User;
 use App\Policies\DoctorRecordPolicy;
+use App\Policies\LaboratoryPolicy;
 use App\Policies\PatientPolicy;
 use App\Policies\PatientRecordPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -34,6 +35,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::define('laboratory-record', [LaboratoryPolicy::class, 'view']);
+        RateLimiter::for('laboratory-upload', fn (Request $request) => Limit::perMinute(30)->by((string) $request->user()?->id));
         Gate::define('patient-record', [PatientRecordPolicy::class, 'view']);
         Gate::policy(Patient::class, PatientPolicy::class);
         foreach ([Appointment::class, Consultation::class, Prescription::class, LabTest::class, DoctorSchedule::class] as $model) {

@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ResourceController;
 use App\Http\Controllers\Admin\WorkflowController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Doctor\DoctorController;
+use App\Http\Controllers\Laboratory\LaboratoryController;
 use App\Http\Controllers\Patient\PatientController;
 use App\Http\Middleware\ApplyHospitalSettings;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,22 @@ Route::middleware(['auth:sanctum', 'active', ApplyHospitalSettings::class])->gro
     Route::put('auth/profile', [AuthController::class, 'profile']);
     Route::get('notifications', [WorkflowController::class, 'notifications']);
     Route::post('notifications/read', [WorkflowController::class, 'readNotifications']);
+    Route::prefix('laboratory')->middleware('laboratory')->group(function (): void {
+        $controller = LaboratoryController::class;
+        Route::get('dashboard', [$controller, 'dashboard']);
+        Route::get('options', [$controller, 'options']);
+        Route::get('tests', [$controller, 'index']);
+        Route::get('tests/{id}', [$controller, 'show'])->whereNumber('id');
+        Route::post('tests/{id}/claim', [$controller, 'claim'])->whereNumber('id');
+        Route::post('tests/{id}/start', [$controller, 'start'])->whereNumber('id');
+        Route::post('tests/{id}/release', [$controller, 'release'])->whereNumber('id');
+        Route::put('tests/{id}/results', [$controller, 'saveResults'])->whereNumber('id');
+        Route::post('tests/{id}/complete', [$controller, 'complete'])->whereNumber('id');
+        Route::post('tests/{id}/reports', [$controller, 'upload'])->whereNumber('id')->middleware('throttle:laboratory-upload');
+        Route::delete('reports/{id}', [$controller, 'deleteReport'])->whereNumber('id');
+        Route::get('reports/{id}/preview', [$controller, 'preview'])->whereNumber('id');
+        Route::get('reports/{id}/download', [$controller, 'download'])->whereNumber('id');
+    });
     Route::prefix('patient')->middleware('patient')->group(function (): void {
         $controller = PatientController::class;
         Route::get('dashboard', [$controller, 'dashboard']);

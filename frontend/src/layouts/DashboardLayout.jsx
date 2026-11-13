@@ -77,8 +77,10 @@ const ROLE_NAV_ITEMS = {
   lab_tech: [
     { label: 'Dashboard', path: '/lab/dashboard' },
     { label: 'Investigation Queue', path: '/lab/queue' },
-    { label: 'Process Tests', path: '/lab/process' },
-    { label: 'Report Upload', path: '/lab/reports' },
+    { label: 'My Work', path: '/lab/process' },
+    { label: 'Reports & Uploads', path: '/lab/reports' },
+    { label: 'Completed History', path: '/lab/history' },
+    { label: 'My Profile', path: '/lab/profile' },
   ],
   pharmacist: [
     { label: 'Dashboard', path: '/pharmacy/dashboard' },
@@ -160,7 +162,7 @@ export const DashboardLayout = () => {
           mb: 4,
           cursor: 'pointer',
         }}
-        onClick={() => navigate(`/${role}/dashboard`)}
+        onClick={() => navigate(`/${role === 'lab_tech' ? 'lab' : role === 'pharmacist' ? 'pharmacy' : role}/dashboard`)}
       >
         <Typography
           variant="h5"
@@ -191,7 +193,7 @@ export const DashboardLayout = () => {
       {/* Navigation Links */}
       <List sx={{ p: 0, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path || (item.path !== `/${role}/dashboard` && location.pathname.startsWith(item.path));
+          const isActive = location.pathname === item.path || (item.path !== `/${role === 'lab_tech' ? 'lab' : role === 'pharmacist' ? 'pharmacy' : role}/dashboard` && location.pathname.startsWith(item.path));
           return (
             <ListItemButton
               key={item.label}
@@ -279,10 +281,10 @@ export const DashboardLayout = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1.5 }, flexShrink: 0 }}>
             <TextField
               size="small"
-              placeholder={role === 'patient' ? 'Search doctors…' : 'Search patients…'}
+              placeholder={role === 'patient' ? 'Search doctors…' : role === 'lab_tech' ? 'Search investigations…' : 'Search patients…'}
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { if (role === 'patient') navigate(`/patient/book-appointment?search=${encodeURIComponent(globalSearch)}`); else if (['admin','doctor'].includes(role)) navigate(`/${role}/patients?search=${encodeURIComponent(globalSearch)}`); }; }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { if (role === 'patient') navigate(`/patient/book-appointment?search=${encodeURIComponent(globalSearch)}`); else if (role === 'lab_tech') navigate(`/lab/queue?search=${encodeURIComponent(globalSearch)}`); else if (['admin','doctor'].includes(role)) navigate(`/${role}/patients?search=${encodeURIComponent(globalSearch)}`); }; }}
               slotProps={{ input: {
                 startAdornment: (
                   <InputAdornment position="start">
@@ -367,7 +369,7 @@ export const DashboardLayout = () => {
                 </Typography>
               </Box>
               <Divider />
-              <MenuItem onClick={() => { setAvatarAnchor(null); navigate(['admin','doctor','patient'].includes(role) ? `/${role}/profile` : `/${role}/dashboard`); }}>
+              <MenuItem onClick={() => { setAvatarAnchor(null); navigate(['admin','doctor','patient','lab_tech'].includes(role) ? `/${role === 'lab_tech' ? 'lab' : role}/profile` : `/${role === 'lab_tech' ? 'lab' : role === 'pharmacist' ? 'pharmacy' : role}/dashboard`); }}>
                 <PersonIcon sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} /> Profile Info
               </MenuItem>
               <MenuItem onClick={handleLogout} sx={{ color: brandColors.coral.main }}>
