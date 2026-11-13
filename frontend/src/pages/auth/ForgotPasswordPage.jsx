@@ -40,8 +40,8 @@ export const ForgotPasswordPage = () => {
     setErrorMsg('');
     setSuccessMsg('');
     try {
-      await authService.forgotPassword(data.email);
-      setSuccessMsg('Password reset link has been dispatched to your email address.');
+      const response = await authService.forgotPassword(data.email);
+      setSuccessMsg(response.message);
     } catch {
       setErrorMsg('Unable to process password reset. Please verify your email.');
     } finally {

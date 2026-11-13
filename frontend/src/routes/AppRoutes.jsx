@@ -13,6 +13,7 @@ import RoleRoute from './RoleRoute';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 
 // Shared Pages
 import ForbiddenPage from '../pages/shared/ForbiddenPage';
@@ -20,12 +21,11 @@ import NotFoundPage from '../pages/shared/NotFoundPage';
 
 // Role Dashboards & Modules
 import AdminDashboard from '../pages/admin/AdminDashboard';
+import AdminWorkspace from '../pages/admin/AdminWorkspace';
+import ProfilePage from '../pages/shared/ProfilePage';
 import PatientsPage from '../pages/admin/PatientsPage';
 import DoctorsPage from '../pages/admin/DoctorsPage';
-import WardsBedsPage from '../pages/admin/WardsBedsPage';
 import BillingPage from '../pages/admin/BillingPage';
-import AuditLogsPage from '../pages/admin/AuditLogsPage';
-import ReportsPage from '../pages/admin/ReportsPage';
 
 import DoctorDashboard from '../pages/doctor/DoctorDashboard';
 import PatientDashboard from '../pages/patient/PatientDashboard';
@@ -54,6 +54,7 @@ export const AppRoutes = () => {
       {/* Public Auth Routes */}
       <Route path="/login" element={isAuthenticated ? <Navigate to={getHomeRedirect()} replace /> : <LoginPage />} />
       <Route path="/register" element={isAuthenticated ? <Navigate to={getHomeRedirect()} replace /> : <RegisterPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       {/* Shared Error Routes */}
@@ -73,15 +74,19 @@ export const AppRoutes = () => {
       >
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="patients" element={<PatientsPage />} />
-        <Route path="doctors" element={<DoctorsPage />} />
-        <Route path="appointments" element={<AdminDashboard />} />
-        <Route path="laboratory" element={<LabDashboard />} />
-        <Route path="pharmacy" element={<PharmacyDashboard />} />
-        <Route path="wards-beds" element={<WardsBedsPage />} />
-        <Route path="billing" element={<BillingPage />} />
-        <Route path="reports" element={<ReportsPage />} />
-        <Route path="audit-logs" element={<AuditLogsPage />} />
+        <Route path="users" element={<AdminWorkspace key="users" resources={['users']} />} />
+        <Route path="organization" element={<AdminWorkspace key="organization" resources={['departments','specializations','services']} />} />
+        <Route path="patients" element={<AdminWorkspace key="patients" resources={['patients']} />} />
+        <Route path="doctors" element={<AdminWorkspace key="doctors" resources={['doctors','doctor-schedules']} />} />
+        <Route path="appointments" element={<AdminWorkspace key="appointments" resources={['appointments']} />} />
+        <Route path="laboratory" element={<AdminWorkspace key="laboratory" resources={['lab-test-types','lab-tests','lab-reports']} />} />
+        <Route path="pharmacy" element={<AdminWorkspace key="pharmacy" resources={['medicines','stock-movements','prescriptions']} />} />
+        <Route path="wards-beds" element={<AdminWorkspace key="wards-beds" resources={['wards','beds','admissions']} />} />
+        <Route path="billing" element={<AdminWorkspace key="billing" resources={['invoices','payments']} />} />
+        <Route path="reports" element={<AdminWorkspace key="reports" reporting resources={['patients','appointments','doctor-performance','consultations','prescriptions','medicines','stock-movements','dispensations','lab-tests','laboratory-revenue','admissions','beds','invoices','payments','revenue','audit-logs','login-attempts']} />} />
+        <Route path="audit-logs" element={<AdminWorkspace key="audit-logs" resources={['audit-logs','login-attempts']} />} />
+        <Route path="settings" element={<AdminWorkspace key="settings" resources={['settings']} />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
 
       {/* DOCTOR PORTAL */}

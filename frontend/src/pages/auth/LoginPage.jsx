@@ -10,7 +10,6 @@ import {
   Alert,
   IconButton,
   InputAdornment,
-  Chip,
   Divider,
 } from '@mui/material';
 import {
@@ -33,14 +32,6 @@ const schema = yup.object().shape({
   password: yup.string().required('Password is required'),
 });
 
-const QUICK_DEMO_ACCOUNTS = [
-  { role: 'Admin', email: 'admin@medicare.test', label: 'Admin (Mugisha)' },
-  { role: 'Doctor', email: 'doctor@medicare.test', label: 'Doctor (Ingabire)' },
-  { role: 'Patient', email: 'patient@medicare.test', label: 'Patient (Uwase)' },
-  { role: 'Lab Tech', email: 'lab@medicare.test', label: 'Lab Tech (Nshuti)' },
-  { role: 'Pharmacist', email: 'pharmacist@medicare.test', label: 'Pharmacist (Kayitesi)' },
-];
-
 export const LoginPage = () => {
   const navigate = useNavigate();
   const { login, sessionExpiredMessage, clearSessionExpiredMessage } = useAuth();
@@ -51,13 +42,12 @@ export const LoginPage = () => {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      email: 'admin@medicare.test',
-      password: 'password123',
+      email: '',
+      password: '',
     },
   });
 
@@ -78,12 +68,6 @@ export const LoginPage = () => {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const setDemoAccount = (acc) => {
-    setValue('email', acc.email, { shouldValidate: true });
-    setValue('password', 'password123', { shouldValidate: true });
-    setServerError('');
   };
 
   return (
@@ -160,36 +144,13 @@ export const LoginPage = () => {
             </Alert>
           )}
 
-          {/* Quick Role Switcher Chips for Evaluator Testing */}
-          <Box sx={{ mb: 3, p: 1.5, bgcolor: 'background.default', borderRadius: 2 }}>
-            <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', display: 'block', mb: 1 }}>
-              Quick Login by Role:
-            </Typography>
-            <Stack direction="row" flexWrap="wrap" gap={0.8}>
-              {QUICK_DEMO_ACCOUNTS.map((acc) => (
-                <Chip
-                  key={acc.role}
-                  label={acc.role}
-                  size="small"
-                  onClick={() => setDemoAccount(acc)}
-                  variant="outlined"
-                  sx={{
-                    borderColor: 'primary.main',
-                    color: 'primary.main',
-                    cursor: 'pointer',
-                    '&:hover': { bgcolor: brandColors.teal[50] },
-                  }}
-                />
-              ))}
-            </Stack>
-          </Box>
-
           <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
             <Stack spacing={2.5}>
               <TextField
                 fullWidth
                 label="Email Address"
-                placeholder="name@medicare.test"
+                placeholder="Your account email"
+                autoComplete="username"
                 {...register('email')}
                 error={Boolean(errors.email)}
                 helperText={errors.email?.message}
@@ -205,6 +166,7 @@ export const LoginPage = () => {
               <TextField
                 fullWidth
                 label="Password"
+                autoComplete="current-password"
                 type={showPassword ? 'text' : 'password'}
                 {...register('password')}
                 error={Boolean(errors.password)}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IconButton,
   Badge,
@@ -13,11 +13,22 @@ import {
 } from '@mui/material';
 import { Notifications as NotificationsIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
 import { brandColors } from '../theme/palette';
-import { MOCK_NOTIFICATIONS } from '../services/mockData';
+import api from '../services/axiosInstance';
 
 export const NotificationBell = () => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
+
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try { const response = await api.get('/notifications'); if (active) { setNotifications(response.data.data); setError(''); } }
+      catch { if (active) setError('Unable to load notifications.'); }
+    };
+    load(); const timer = setInterval(load, 30000);
+    return () => { active = false; clearInterval(timer); };
+  }, []);
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
@@ -29,8 +40,9 @@ export const NotificationBell = () => {
     setAnchorEl(null);
   };
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+  const markAllRead = async () => {
+    try { await api.post('/notifications/read'); setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true }))); }
+    catch { setError('Unable to mark notifications as read.'); }
   };
 
   const open = Boolean(anchorEl);
@@ -117,6 +129,8 @@ export const NotificationBell = () => {
         </Box>
         <Divider />
         <List sx={{ p: 0, overflowY: 'auto', maxHeight: 350 }}>
+          {error && <Typography color="error" sx={{ p: 2 }}>{error}</Typography>}
+          {notifications.length === 0 && !error && <Typography sx={{ p: 2 }}>No notifications yet.</Typography>}
           {notifications.map((item) => (
             <ListItem
               key={item.id}

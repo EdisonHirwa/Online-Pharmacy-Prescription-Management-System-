@@ -66,7 +66,6 @@ export const RegisterPage = () => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(registerSchema),
@@ -84,9 +83,6 @@ export const RegisterPage = () => {
       emergency_contact_phone: '',
     },
   });
-
-  const emailValue = watch('email');
-  const isDuplicateEmailPreview = emailValue && emailValue.toLowerCase() === 'patient@medicare.test';
 
   const onSubmit = async (data) => {
     setSubmitting(true);
@@ -159,20 +155,6 @@ export const RegisterPage = () => {
           </Stack>
 
           <Divider sx={{ my: 3 }} />
-
-          {isDuplicateEmailPreview && (
-            <Alert
-              severity="warning"
-              sx={{
-                mb: 3,
-                bgcolor: brandColors.coral[50],
-                color: brandColors.coral.main,
-                border: `1px solid ${brandColors.coral[200]}`,
-              }}
-            >
-              Notice: The email <strong>patient@medicare.test</strong> is already in use by a registered patient. Please use a unique personal email.
-            </Alert>
-          )}
 
           {generalError && (
             <Alert

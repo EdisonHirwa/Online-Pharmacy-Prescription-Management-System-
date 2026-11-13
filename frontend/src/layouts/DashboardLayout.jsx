@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Drawer,
@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
+import api from '../services/axiosInstance';
 import { useThemeMode } from '../contexts/ThemeContext';
 import NotificationBell from '../components/NotificationBell';
 import { brandColors } from '../theme/palette';
@@ -39,6 +40,8 @@ const SIDEBAR_WIDTH = 260;
 const ROLE_NAV_ITEMS = {
   admin: [
     { label: 'Dashboard', path: '/admin/dashboard' },
+    { label: 'Users & Access', path: '/admin/users' },
+    { label: 'Organization & Services', path: '/admin/organization' },
     { label: 'Patients', path: '/admin/patients' },
     { label: 'Doctors & Schedules', path: '/admin/doctors' },
     { label: 'Appointments', path: '/admin/appointments' },
@@ -48,6 +51,8 @@ const ROLE_NAV_ITEMS = {
     { label: 'Billing & Payments', path: '/admin/billing' },
     { label: 'Reports', path: '/admin/reports' },
     { label: 'Audit Logs', path: '/admin/audit-logs' },
+    { label: 'Hospital Settings', path: '/admin/settings' },
+    { label: 'My Profile', path: '/admin/profile' },
   ],
   doctor: [
     { label: 'Dashboard', path: '/doctor/dashboard' },
@@ -107,6 +112,13 @@ const getUserInitials = (name, role) => {
 };
 
 export const DashboardLayout = () => {
+  const [globalSearch, setGlobalSearch] = useState('');
+  const [hospitalName, setHospitalName] = useState('MediCare HMS');
+  useEffect(() => {
+    const load = () => api.get('/configuration').then((response) => setHospitalName(response.data.data.hospital_name || 'MediCare HMS')).catch(() => {});
+    load(); window.addEventListener('hospital:configuration-updated', load);
+    return () => window.removeEventListener('hospital:configuration-updated', load);
+  }, []);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -169,7 +181,7 @@ export const DashboardLayout = () => {
             fontSize: '1.15rem',
           }}
         >
-          MediCare HMS
+          {hospitalName}
         </Typography>
       </Box>
 
@@ -208,10 +220,7 @@ export const DashboardLayout = () => {
             >
               <ListItemText
                 primary={item.label}
-                primaryTypographyProps={{
-                  fontSize: '0.9rem',
-                  fontWeight: isActive ? 600 : 500,
-                }}
+                slotProps={{ primary: { sx: { color: 'inherit', fontSize: '0.9rem', fontWeight: isActive ? 600 : 500 } } }}
               />
             </ListItemButton>
           );
@@ -236,7 +245,7 @@ export const DashboardLayout = () => {
       <AppBar
         position="fixed"
         sx={{
-          width: { md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
+          width: { xs: '100%', md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
           ml: { md: `${SIDEBAR_WIDTH}px` },
           bgcolor: 'background.paper',
           borderBottom: '1px solid',
@@ -259,15 +268,18 @@ export const DashboardLayout = () => {
               </IconButton>
             )}
             <Typography variant="h5" sx={{ fontWeight: 700, color: isDark ? '#FFFFFF' : 'secondary.main', fontSize: { xs: '1.1rem', sm: '1.4rem' } }}>
-              {getRoleTitle(role)}
+              {navItems.find((item) => location.pathname === item.path)?.label || getRoleTitle(role)}
             </Typography>
           </Box>
 
           {/* Right Header Controls matching reference design */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1.5 }, flexShrink: 0 }}>
             <TextField
               size="small"
-              placeholder="Search patients, doctors..."
+              placeholder="Search patients…"
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && role === 'admin') navigate(`/admin/patients?search=${encodeURIComponent(globalSearch)}`); }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -352,7 +364,7 @@ export const DashboardLayout = () => {
                 </Typography>
               </Box>
               <Divider />
-              <MenuItem onClick={() => { setAvatarAnchor(null); navigate(`/${role}/dashboard`); }}>
+              <MenuItem onClick={() => { setAvatarAnchor(null); navigate(role === 'admin' ? '/admin/profile' : `/${role}/dashboard`); }}>
                 <PersonIcon sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} /> Profile Info
               </MenuItem>
               <MenuItem onClick={handleLogout} sx={{ color: brandColors.coral.main }}>
@@ -409,8 +421,9 @@ export const DashboardLayout = () => {
         component="main"
         sx={{
           flexGrow: 1,
+          minWidth: 0,
           p: { xs: 2, sm: 3, md: 4 },
-          width: { md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
+          width: { xs: '100%', md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
           mt: 8,
           minHeight: 'calc(100vh - 64px)',
         }}

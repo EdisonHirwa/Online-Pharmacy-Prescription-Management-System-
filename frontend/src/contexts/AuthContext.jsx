@@ -16,8 +16,30 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem(AUTH_TOKEN_KEY)));
   const [sessionExpiredMessage, setSessionExpiredMessage] = useState(null);
+
+  useEffect(() => {
+    if (!token) { setLoading(false); return; }
+    let active = true;
+    const validateSession = async () => {
+      try {
+        const response = await authService.getProfile();
+        if (active) {
+          setUser(response.data);
+          localStorage.setItem(AUTH_USER_KEY, JSON.stringify(response.data));
+        }
+      } catch (error) {
+        if (active && error.response?.status === 401) {
+          setUser(null); setToken(null);
+        }
+      } finally { if (active) setLoading(false); }
+    };
+    validateSession();
+    const timer = setInterval(validateSession, 60000);
+    window.addEventListener('focus', validateSession);
+    return () => { active = false; clearInterval(timer); window.removeEventListener('focus', validateSession); };
+  }, [token]);
 
   // Sync token & user to localStorage
   const saveAuthSession = useCallback((newToken, newUser) => {

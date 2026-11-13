@@ -1,58 +1,78 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# MediCare Hospital — Laravel API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 13, Sanctum, PHP 8.3+, and MySQL. The Admin portal uses real database records. Other role-specific clinical workflows will be integrated in subsequent phases.
 
-## About Laravel
+## Installation
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+1. Run `composer install` inside `backend`.
+2. Copy `.env.example` to `.env` for a new installation. Configure MySQL credentials and create the empty `online_pharmacy_db` database. Preserve an existing `.env`.
+3. Run `php artisan key:generate` on a new installation.
+4. Run `php artisan migrate` and `php artisan db:seed`. These add missing schema and initial hospital configuration without resetting existing records. A compatibility migration repairs older users tables whose original migration was edited after execution.
+5. Create the first administrator:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+   ```bash
+   php artisan admin:create admin@example.com --phone=+250788123456 --name="Hospital Administrator"
+   ```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+   The command prints a generated password once and refuses to overwrite an existing account. Change the password through My Profile after signing in.
+6. Start the API with `php artisan serve --host=127.0.0.1 --port=8000`.
+7. Inside `frontend`, run `npm ci` and `npm run dev`. The frontend's `VITE_API_BASE_URL` defaults to `http://localhost:8000/api`.
 
-## Learning Laravel
+Set `FRONTEND_URL=http://localhost:5173` for password recovery links. Configure allowed frontend origins in `config/cors.php` if changing ports. The default development mailer writes recovery messages to `storage/logs/laravel.log`; configure SMTP in `.env` for email delivery. Keep recovery tokens private.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Admin functionality
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- Password-verified authentication, eight-hour Sanctum tokens, logout revocation, account status checks, and failed-login lockouts.
+- User CRUD, five roles, permission assignments, account activation/deactivation, and session revocation after administrative account changes. The backend Gate protects all management endpoints. Administrators have full management access; other roles cannot call Admin endpoints.
+- Department, specialization, doctor, consultation schedule, service, laboratory test type, medicine, ward, bed, and hospital settings management.
+- Patient profiles with appointment, consultation, allergy, and medical history views. Create the patient's or doctor's user account first, then link its profile.
+- Appointment booking, confirmation/rejection/cancellation, and rescheduling, with schedule and slot validation.
+- Transactional admissions/discharges, invoice creation with multiple charges, payment recording, duplicate payment reference protection, and stock adjustments with movement history.
+- Database statistics, operational reports, CSV/PDF exports, login attempts, audit activity, and authorized laboratory file downloads.
+- Laravel events/listeners and Notifications persist workflow notifications for the affected patient. Notifications and dashboard figures are polled every 30 seconds in the frontend.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+Invoice charges are entered by Admin; automatic billing from clinical dispensing and laboratory completion remains part of the forthcoming clinical workflows. Payments record cash, card, and mobile money transactions; no payment gateway is connected. Historical financial records cannot be deleted. Records with clinical dependencies are retained. Occupied beds cannot be edited until discharge.
 
-## Agentic Development
+## API
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Requests and responses use JSON. Send `Authorization: Bearer <token>` to protected endpoints.
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /api/auth/login` | Email and password; returns user and token |
+| `GET /api/auth/me` | Validate current session |
+| `POST /api/auth/logout` | Revoke current token |
+| `PUT /api/auth/profile` | Update own details; password changes require current password and confirmation |
+| `POST /api/auth/forgot-password` | Request recovery instructions |
+| `POST /api/auth/reset-password` | Reset using email, token, and confirmed password |
+| `GET /api/dashboard/stats` | Admin statistics |
+| `GET /api/admin/catalog` | Allowed resources and validated form fields |
+| `GET /api/admin/options` | Reference choices for Admin forms |
+| `GET/POST /api/admin/{resource}` | Paginated listing / creation |
+| `GET/PUT/DELETE /api/admin/{resource}/{id}` | Detail / update / guarded deletion |
+| `POST /api/admin/appointments/{id}/reschedule` | Validate and change an existing appointment slot |
+| `POST /api/admin/appointments/{id}/status` | Confirm, cancel, or reject |
+| `POST /api/admin/admissions` | Admit patient into an available bed |
+| `POST /api/admin/admissions/{id}/discharge` | Record discharge summary and release bed |
+| `POST /api/admin/invoices` | Patient and `items[]` with description, type, quantity, and unit price |
+| `POST /api/admin/invoices/{id}/payments` | Amount, method, and unique payment reference |
+| `POST /api/admin/invoices/{id}/cancel` | Cancel an unpaid invoice |
+| `POST /api/admin/medicines/{id}/stock` | Signed quantity and reason |
+| `GET /api/admin/reports/{resource}?format=csv` | Export filtered records; also supports `pdf` |
+| `GET /api/admin/analytics/{report}` | Doctor performance, laboratory charges, or received revenue |
+| `GET /api/admin/lab-reports/{id}/download` | Authorized private file download |
+| `GET /api/notifications` | Own notifications |
+| `POST /api/notifications/read` | Mark own notifications read |
+
+Listing filters include `search`, `page`, `per_page` (up to 100), `sort`, `direction`, `start_date`, `end_date`, and relevant status, role, patient, doctor, department, ward, or payment method fields. Medicine filters also include `low_stock=1` and `expiring=1`. Financial and workflow records use dedicated endpoints rather than generic CRUD. Duplicate retries with the same payment reference and details return the recorded payment without changing the balance again.
+
+## Verification
+
+Run from `backend`:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+php artisan test --compact
+vendor/bin/pint --dirty --format agent
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Tests use an isolated in-memory SQLite database and do not reset development MySQL records. The Admin feature tests cover authentication, role restrictions, CRUD and validation, protected history, schedules, appointment conflicts and rescheduling, admissions, payments, stock, reports, recovery, and notifications. Build the frontend with `npm run build` from `frontend`.
