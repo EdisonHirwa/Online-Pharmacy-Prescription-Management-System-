@@ -1,6 +1,6 @@
 # MediCare Hospital — Laravel API
 
-Laravel 13, Sanctum, PHP 8.3+, and MySQL. The Admin, Doctor, Patient, and Laboratory Technician portals use real database records. Pharmacy dispensing remains for a subsequent phase.
+Laravel 13, Sanctum, PHP 8.3+, and MySQL. The Admin, Doctor, Patient, Laboratory Technician, and Pharmacist portals use real database records.
 
 ## Installation
 
@@ -31,7 +31,7 @@ Set `FRONTEND_URL=http://localhost:5173` for password recovery links. Configure 
 - Database statistics, operational reports, CSV/PDF exports, login attempts, audit activity, and authorized laboratory file downloads.
 - Laravel events/listeners and Notifications persist workflow notifications for the affected patient. Notifications and dashboard figures are polled every 30 seconds in the frontend.
 
-Admin can enter invoice charges. Doctor consultation completion and laboratory requests now create linked charges automatically. Pharmacy dispensing charges remain part of the upcoming pharmacy workflow. Payments record cash, card, and mobile money transactions; no payment gateway is connected. Historical financial records cannot be deleted. Records with clinical dependencies are retained. Occupied beds cannot be edited until discharge.
+Admin can enter invoice charges. Doctor consultation completion and laboratory requests now create linked charges automatically. Pharmacy dispensing adds charges for actual dispensed quantities using the price recorded on the prescription. Payments record cash, card, and mobile money transactions; no payment gateway is connected. Historical financial records cannot be deleted. Records with clinical dependencies are retained. Occupied beds cannot be edited until discharge.
 
 ## Doctor functionality
 
@@ -121,3 +121,16 @@ Create an active `lab_tech` user in Admin → Users & Access, then sign in norma
 The `/api/laboratory` endpoints provide live dashboard counts, investigation filters/search/sorting/pagination, and the requested → assigned → processing → completed workflow. Technicians claim requests themselves and can release unstarted assignments. Records assigned to other technicians are inaccessible. Draft findings and preliminary reports remain private until completion; finalization notifies the requesting doctor and patient. Completed records and reports are read-only. Investigation charges are created by the existing Doctor request workflow and are not duplicated on completion.
 
 Upload PDF, JPEG, or PNG reports up to 2 MB each while processing. Extension, detected MIME type, and size are validated. Reports use randomized private storage paths with authenticated preview/download endpoints; raw paths are excluded from responses. Draft files can be removed before finalization. Assignment and result changes, file access, and denied record access are audited. Upload metadata failures remove the newly stored file.
+
+
+## Pharmacist portal
+
+Create an active `pharmacist` user in Admin → Users & Access and sign in normally; no separate profile record is required. Empty/default permissions allow pharmacy management. If custom permissions are assigned, include `manage_pharmacy` to enable changes; otherwise pharmacy screens are read-only.
+
+The `/api/pharmacy` endpoints provide a live dashboard, prescription queue, prescription details and allergy review, partial/full dispensing, medicine catalog management, stock adjustments, stock movements, and immutable dispensing history. Pharmacists can access the information needed for prescriptions without receiving unrelated consultations, patient finances, or user account details.
+
+Dispensing validates positive whole quantities against remaining prescribed quantities and available stock, including combined stock requirements when multiple lines reference one medicine. Expired, inactive, or unavailable medicines cannot be dispensed. Pharmacists must acknowledge reviewing prescriptions and allergy information; recorded allergies are displayed for professional review rather than automatically inferred from medicine names.
+
+Prescription and medicine row locks, database transactions, and submission keys protect stock, dispensation records, and invoices from inconsistent or duplicate submissions. A version check requires renewed review when the prescription, previously dispensed allowance, or recorded allergies change. Charges use the prescribed price and actual dispensed quantity. Existing paid invoices remain preserved; new charges use a new invoice. Doctor and patient receive dispensing notifications; pharmacy users receive alerts when stock crosses the reorder level.
+
+New medicines start with zero stock. Additions and deductions require a reason and create audit and stock movement records. Retire medicines with inactive status; clinical and dispensing history is retained. The existing inventory schema stores one expiry date per medicine catalog entry. Run `php artisan migrate --force --no-interaction` on another installation to add the nullable dispensing submission identity fields.

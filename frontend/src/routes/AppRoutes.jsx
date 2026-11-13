@@ -34,6 +34,9 @@ import PatientProfilePage from '../pages/patient/PatientProfilePage';
 import LabDashboard from '../pages/lab/LabDashboard';
 import LaboratoryWorkspace from '../pages/lab/LaboratoryWorkspace';
 import PharmacyDashboard from '../pages/pharmacy/PharmacyDashboard';
+import PharmacyPrescriptions from '../pages/pharmacy/PharmacyPrescriptions';
+import PharmacyInventory from '../pages/pharmacy/PharmacyInventory';
+import PharmacyHistory from '../pages/pharmacy/PharmacyHistory';
 
 export const AppRoutes = () => {
   const { user, isAuthenticated } = useAuth();
@@ -170,10 +173,12 @@ export const AppRoutes = () => {
       >
         <Route index element={<Navigate to="/pharmacy/dashboard" replace />} />
         <Route path="dashboard" element={<PharmacyDashboard />} />
-        <Route path="queue" element={<PharmacyDashboard />} />
-        <Route path="dispense" element={<PharmacyDashboard />} />
-        <Route path="inventory" element={<PharmacyDashboard />} />
-        <Route path="movements" element={<PharmacyDashboard />} />
+        <Route path="queue" element={<PharmacyPrescriptions key="pharmacy-queue" />} />
+        <Route path="dispense" element={<PharmacyPrescriptions key="pharmacy-dispense" all />} />
+        <Route path="inventory" element={<PharmacyInventory />} />
+        <Route path="movements" element={<PharmacyHistory key="pharmacy-movements" movements />} />
+        <Route path="history" element={<PharmacyHistory key="pharmacy-history" />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
 
       {/* Fallback to 404 */}

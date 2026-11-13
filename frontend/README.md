@@ -53,3 +53,12 @@ Build output is written to `dist/`. Host with SPA route fallback and configure t
 Sign in with an active `lab_tech` account created by Admin. The portal includes a database-backed dashboard, Investigation Queue, My Work, Reports & Uploads, Completed History, and My Profile. Counts and lists refresh every 30 seconds; lists support search, filters, sorting, and pagination.
 
 Claim a request, open My Work, start processing, and enter findings. Save drafts and optionally attach PDF/JPEG/PNG reports up to 2 MB each, with preview, upload progress, and protected downloads. Review & finalize publishes results to the doctor and patient after confirmation. Completed findings and files are read-only. A custom account permission list must include `manage_laboratory` for editing; otherwise the portal is read-only.
+
+
+## Pharmacist portal
+
+Sign in with an active `pharmacist` account created by Admin. Dedicated pages include a live dashboard, Prescription Queue, Prescriptions & Dispensing, Medicine Inventory, Stock Movements, Dispensing History, and My Profile. Dashboard and lists refresh every 30 seconds, with server-side search, filtering, sorting, and pagination.
+
+Open a prescription, review its instructions and recorded allergies, enter the quantities to supply, acknowledge review, and confirm dispensing. Partial dispensing retains the remaining allowance in the queue. Stock and patient charges update together, while submission keys prevent duplicate processing on retries. Read-only history shows quantities, prices, responsible pharmacists, and notes.
+
+Add or edit medicine details, monitor low stock and expiry, and record signed stock adjustments with reasons and confirmation. New medicines begin with zero stock. Expired and inactive medicines are blocked from dispensing. Custom permissions must include `manage_pharmacy` for editing.

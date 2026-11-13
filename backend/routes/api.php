@@ -9,6 +9,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Doctor\DoctorController;
 use App\Http\Controllers\Laboratory\LaboratoryController;
 use App\Http\Controllers\Patient\PatientController;
+use App\Http\Controllers\Pharmacy\PharmacyController;
 use App\Http\Middleware\ApplyHospitalSettings;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,19 @@ Route::middleware(['auth:sanctum', 'active', ApplyHospitalSettings::class])->gro
     Route::put('auth/profile', [AuthController::class, 'profile']);
     Route::get('notifications', [WorkflowController::class, 'notifications']);
     Route::post('notifications/read', [WorkflowController::class, 'readNotifications']);
+    Route::prefix('pharmacy')->middleware('pharmacist')->group(function (): void {
+        $controller = PharmacyController::class;
+        Route::get('dashboard', [$controller, 'dashboard']);
+        Route::get('prescriptions', [$controller, 'prescriptions']);
+        Route::get('prescriptions/{id}', [$controller, 'prescription'])->whereNumber('id');
+        Route::post('prescriptions/{id}/dispense', [$controller, 'dispense'])->whereNumber('id');
+        Route::get('medicines', [$controller, 'medicines']);
+        Route::post('medicines', [$controller, 'saveMedicine']);
+        Route::put('medicines/{id}', [$controller, 'saveMedicine'])->whereNumber('id');
+        Route::post('medicines/{id}/stock', [$controller, 'stock'])->whereNumber('id');
+        Route::get('movements', [$controller, 'movements']);
+        Route::get('history', [$controller, 'history']);
+    });
     Route::prefix('laboratory')->middleware('laboratory')->group(function (): void {
         $controller = LaboratoryController::class;
         Route::get('dashboard', [$controller, 'dashboard']);

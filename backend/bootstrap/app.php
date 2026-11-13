@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureAdministrator;
 use App\Http\Middleware\EnsureDoctor;
 use App\Http\Middleware\EnsureLaboratoryTechnician;
 use App\Http\Middleware\EnsurePatient;
+use App\Http\Middleware\EnsurePharmacist;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias(['active' => EnsureActiveAccount::class, 'admin' => EnsureAdministrator::class, 'doctor' => EnsureDoctor::class, 'patient' => EnsurePatient::class, 'laboratory' => EnsureLaboratoryTechnician::class]);
+        $middleware->alias(['active' => EnsureActiveAccount::class, 'admin' => EnsureAdministrator::class, 'doctor' => EnsureDoctor::class, 'patient' => EnsurePatient::class, 'laboratory' => EnsureLaboratoryTechnician::class, 'pharmacist' => EnsurePharmacist::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (QueryException $exception, Request $request) {

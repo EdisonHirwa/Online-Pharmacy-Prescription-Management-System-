@@ -85,9 +85,11 @@ const ROLE_NAV_ITEMS = {
   pharmacist: [
     { label: 'Dashboard', path: '/pharmacy/dashboard' },
     { label: 'Prescription Queue', path: '/pharmacy/queue' },
-    { label: 'Dispense Screen', path: '/pharmacy/dispense' },
+    { label: 'Prescriptions & Dispensing', path: '/pharmacy/dispense' },
     { label: 'Medicine Inventory', path: '/pharmacy/inventory' },
     { label: 'Stock Movements', path: '/pharmacy/movements' },
+    { label: 'Dispensing History', path: '/pharmacy/history' },
+    { label: 'My Profile', path: '/pharmacy/profile' },
   ],
 };
 
@@ -281,10 +283,10 @@ export const DashboardLayout = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1.5 }, flexShrink: 0 }}>
             <TextField
               size="small"
-              placeholder={role === 'patient' ? 'Search doctors…' : role === 'lab_tech' ? 'Search investigations…' : 'Search patients…'}
+              placeholder={role === 'patient' ? 'Search doctors…' : role === 'lab_tech' ? 'Search investigations…' : role === 'pharmacist' ? 'Search prescriptions…' : 'Search patients…'}
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { if (role === 'patient') navigate(`/patient/book-appointment?search=${encodeURIComponent(globalSearch)}`); else if (role === 'lab_tech') navigate(`/lab/queue?search=${encodeURIComponent(globalSearch)}`); else if (['admin','doctor'].includes(role)) navigate(`/${role}/patients?search=${encodeURIComponent(globalSearch)}`); }; }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { if (role === 'patient') navigate(`/patient/book-appointment?search=${encodeURIComponent(globalSearch)}`); else if (role === 'pharmacist') navigate(`/pharmacy/queue?search=${encodeURIComponent(globalSearch)}`); else if (role === 'lab_tech') navigate(`/lab/queue?search=${encodeURIComponent(globalSearch)}`); else if (['admin','doctor'].includes(role)) navigate(`/${role}/patients?search=${encodeURIComponent(globalSearch)}`); }; }}
               slotProps={{ input: {
                 startAdornment: (
                   <InputAdornment position="start">
@@ -369,7 +371,7 @@ export const DashboardLayout = () => {
                 </Typography>
               </Box>
               <Divider />
-              <MenuItem onClick={() => { setAvatarAnchor(null); navigate(['admin','doctor','patient','lab_tech'].includes(role) ? `/${role === 'lab_tech' ? 'lab' : role}/profile` : `/${role === 'lab_tech' ? 'lab' : role === 'pharmacist' ? 'pharmacy' : role}/dashboard`); }}>
+              <MenuItem onClick={() => { setAvatarAnchor(null); navigate(['admin','doctor','patient','lab_tech','pharmacist'].includes(role) ? `/${role === 'lab_tech' ? 'lab' : role === 'pharmacist' ? 'pharmacy' : role}/profile` : `/${role === 'lab_tech' ? 'lab' : role === 'pharmacist' ? 'pharmacy' : role}/dashboard`); }}>
                 <PersonIcon sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} /> Profile Info
               </MenuItem>
               <MenuItem onClick={handleLogout} sx={{ color: brandColors.coral.main }}>

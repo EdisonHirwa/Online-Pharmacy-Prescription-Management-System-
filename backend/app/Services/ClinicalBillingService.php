@@ -11,9 +11,9 @@ use Illuminate\Support\Str;
 
 class ClinicalBillingService
 {
-    public function charge(Consultation $consultation, string $type, int $reference, string $description, string $price): void
+    public function charge(Consultation $consultation, string $type, int $reference, string $description, string $price, int $quantity = 1): void
     {
-        $cents = (int) round((float) $price * 100);
+        $cents = (int) round((float) $price * 100) * $quantity;
         if ($cents <= 0) {
             return;
         }
@@ -28,10 +28,10 @@ class ClinicalBillingService
         if ($total > 9999999999) {
             abort(422, 'The invoice total exceeds the supported amount.');
         }
-        InvoiceItem::create(['invoice_id' => $invoice->id, 'service_description' => $description, 'service_type' => $type, 'reference_id' => $reference, 'quantity' => 1, 'unit_price' => $price, 'subtotal' => $price]);
+        InvoiceItem::create(['invoice_id' => $invoice->id, 'service_description' => $description, 'service_type' => $type, 'reference_id' => $reference, 'quantity' => $quantity, 'unit_price' => $price, 'subtotal' => $cents / 100]);
         $invoice->update(['total_amount' => $total / 100, 'outstanding_balance' => ($total - (int) round((float) $invoice->amount_paid * 100)) / 100, 'status' => (float) $invoice->amount_paid > 0 ? 'partially_paid' : 'unpaid']);
         AuditService::record('clinical_charge_added', 'invoices', $invoice->id);
-        HospitalActivity::dispatch($consultation->patient->user, 'Invoice updated', 'Your consultation or laboratory charges are available in billing.', 'billing');
+        HospitalActivity::dispatch($consultation->patient->user, 'Invoice updated', 'Your hospital service and medicine charges are available in billing.', 'billing');
     }
 
     public function cancelLabCharge(LabTest $test): void

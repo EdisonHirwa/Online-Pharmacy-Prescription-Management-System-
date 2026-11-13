@@ -13,6 +13,7 @@ use App\Policies\DoctorRecordPolicy;
 use App\Policies\LaboratoryPolicy;
 use App\Policies\PatientPolicy;
 use App\Policies\PatientRecordPolicy;
+use App\Policies\PharmacyPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -35,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::define('pharmacy-record', [PharmacyPolicy::class, 'view']);
         Gate::define('laboratory-record', [LaboratoryPolicy::class, 'view']);
         RateLimiter::for('laboratory-upload', fn (Request $request) => Limit::perMinute(30)->by((string) $request->user()?->id));
         Gate::define('patient-record', [PatientRecordPolicy::class, 'view']);

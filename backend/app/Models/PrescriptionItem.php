@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PrescriptionItem extends Model
 {
@@ -14,6 +15,11 @@ class PrescriptionItem extends Model
     public function medicine(): BelongsTo
     {
         return $this->belongsTo(Medicine::class);
+    }
+
+    public function dispensationItems(): HasMany
+    {
+        return $this->hasMany(DispensationItem::class);
     }
 
     protected function casts(): array
