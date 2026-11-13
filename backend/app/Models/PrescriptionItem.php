@@ -15,4 +15,9 @@ class PrescriptionItem extends Model
     {
         return $this->belongsTo(Medicine::class);
     }
+
+    protected function casts(): array
+    {
+        return ['unit_price' => 'decimal:2', 'quantity' => 'integer'];
+    }
 }

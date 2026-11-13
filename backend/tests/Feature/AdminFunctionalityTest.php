@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Appointment;
 use App\Models\Consultation;
+use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\HospitalBed;
 use App\Models\Invoice;
@@ -11,8 +12,10 @@ use App\Models\LabReport;
 use App\Models\LabTest;
 use App\Models\LabTestType;
 use App\Models\Patient;
+use App\Models\Specialization;
 use App\Models\User;
 use App\Services\AdminCatalog;
+use Database\Seeders\SpecializationSeeder;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -344,5 +347,22 @@ class AdminFunctionalityTest extends TestCase
         $this->getJson('/api/admin/analytics/revenue')->assertOk()->assertJsonPath('data.0.revenue', 20.2);
         $this->getJson('/api/admin/analytics/doctor-performance')->assertOk()->assertJsonPath('data.0.doctor', $doctor->user->name);
         $this->getJson('/api/admin/invoices?end_date='.now()->addDay()->toDateString())->assertOk()->assertJsonPath('total', 1);
+    }
+
+    public function test_specialization_options_are_seeded_without_duplicates_or_overwriting_custom_data(): void
+    {
+        $this->admin();
+        $department = Department::create(['name' => 'Pediatrics', 'status' => 'active']);
+        $existing = Specialization::create(['name' => 'General Pediatrics', 'department_id' => $department->id, 'description' => 'Keep existing description', 'status' => 'inactive']);
+        $this->seed(SpecializationSeeder::class);
+        $count = Specialization::count();
+        $this->seed(SpecializationSeeder::class);
+        $this->assertSame($count, Specialization::count());
+        $this->assertSame('inactive', $existing->fresh()->status);
+        $this->assertSame('Keep existing description', $existing->fresh()->description);
+        $options = $this->getJson('/api/admin/options')->assertOk()->json('data.specializations');
+        $pediatricOptions = collect($options)->where('department_id', $department->id)->pluck('label');
+        $this->assertContains('Pediatric Cardiology', $pediatricOptions);
+        $this->assertContains('Neonatology', $pediatricOptions);
     }
 }

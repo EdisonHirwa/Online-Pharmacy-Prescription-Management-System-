@@ -1,174 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Stack,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-} from '@mui/material';
-import {
-  AddCircle as AddIcon,
-  EventNote as EventNoteIcon,
-  People as PeopleIcon,
-  Science as ScienceIcon,
-} from '@mui/icons-material';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Alert, Box, Button, Card, CardContent, CircularProgress, Stack, Typography } from '@mui/material';
+import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import DashboardCard from '../../components/DashboardCard';
 import DataTable from '../../components/DataTable';
 import StatusChip from '../../components/StatusChip';
-import axiosInstance from '../../services/axiosInstance';
+import { doctorService as service, doctorError } from '../../services/doctorService';
 import { brandColors } from '../../theme/palette';
-
-export const DoctorDashboard = () => {
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [consultationDialogOpen, setConsultationDialogOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-
+export default function DoctorDashboard() {
+  const [stats, setStats] = useState(null);
+  const [error, setError] = useState('');
+  const [revision, setRevision] = useState(0);
   useEffect(() => {
-    axiosInstance.get('/appointments').then((res) => {
-      setAppointments(res.data.data || []);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, []);
-
-  const handleOpenConsultation = (row) => {
-    setSelectedAppointment(row);
-    setConsultationDialogOpen(true);
-  };
-
-  const columns = [
-    { id: 'appointment_number', label: 'Apt No.', render: (r) => <strong>{r.appointment_number}</strong> },
-    { id: 'patient_name', label: 'Patient Name' },
-    { id: 'appointment_date', label: 'Date' },
-    { id: 'appointment_time', label: 'Time' },
-    { id: 'reason', label: 'Clinical Reason' },
-    { id: 'status', label: 'Status', render: (r) => <StatusChip status={r.status} /> },
-    {
-      id: 'actions',
-      label: 'Actions',
-      render: (r) => (
-        <Button
-          size="small"
-          variant="contained"
-          color="primary"
-          onClick={() => handleOpenConsultation(r)}
-          sx={{ textTransform: 'none', py: 0.5, fontSize: '0.75rem' }}
-        >
-          Consult
-        </Button>
-      ),
-    },
-  ];
-
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* KPI Row */}
-      <Grid container spacing={2.5}>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard
-            title="Today's Appointments"
-            value="8"
-            icon={<EventNoteIcon sx={{ color: 'primary.main', fontSize: 20 }} />}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard
-            title="Patients Consulted"
-            value="3"
-            icon={<PeopleIcon sx={{ color: 'primary.main', fontSize: 20 }} />}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard
-            title="Pending Lab Results"
-            value="4"
-            icon={<ScienceIcon sx={{ color: 'primary.main', fontSize: 20 }} />}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard
-            title="Next Available Slot"
-            value="14:30"
-            subtitle="Pediatric Cardiology Clinic"
-          />
-        </Grid>
-      </Grid>
-
-      {/* Appointment Consultation Queue */}
-      <DataTable
-        title="My Patient Consultation Queue"
-        columns={columns}
-        data={appointments}
-        loading={loading}
-        footerCaption="Doctors can initiate clinical notes, prescriptions, and lab requests directly from each queue entry."
-      />
-
-      {/* Consultation Dialog */}
-      <Dialog
-        open={consultationDialogOpen}
-        onClose={() => setConsultationDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{ sx: { borderRadius: 3 } }}
-      >
-        <DialogTitle sx={{ fontWeight: 700, color: 'secondary.main' }}>
-          Record Consultation: {selectedAppointment?.patient_name} ({selectedAppointment?.appointment_number})
-        </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-          <TextField
-            fullWidth
-            label="Clinical Diagnosis"
-            placeholder="Primary diagnostic finding"
-            multiline
-            rows={2}
-          />
-          <TextField
-            fullWidth
-            label="Consultation Notes & Symptoms"
-            placeholder="Patient reported symptoms, vitals, physical examination..."
-            multiline
-            rows={3}
-          />
-          <TextField
-            fullWidth
-            label="Treatment Recommendations & Follow-Up"
-            placeholder="Care instructions, lifestyle advice, follow-up period..."
-            multiline
-            rows={2}
-          />
-          <TextField
-            fullWidth
-            type="date"
-            label="Follow-Up Date (Optional)"
-            InputLabelProps={{ shrink: true }}
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2.5 }}>
-          <Button onClick={() => setConsultationDialogOpen(false)} sx={{ color: 'text.secondary' }}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              alert('Consultation recorded successfully!');
-              setConsultationDialogOpen(false);
-            }}
-          >
-            Save & Finalize Consultation
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
-  );
-};
-
-export default DoctorDashboard;
+    let active = true;
+    const load = async () => { try { const response = await service.dashboard(); if (active) { setStats(response.data.data); setError(''); } } catch (err) { if (active) setError(doctorError(err)); } };
+    load(); const timer = setInterval(load, 30000); return () => { active = false; clearInterval(timer); };
+  }, [revision]);
+  if (!stats && !error) return <Box sx={{ display: 'grid', placeItems: 'center', minHeight: '50vh' }}><CircularProgress /></Box>;
+  return <Stack spacing={3} sx={{ minWidth: 0 }}>
+    <Typography variant="h5" fontWeight={700}>Doctor Overview</Typography>
+    {error && <Alert severity="error" action={<Button onClick={() => setRevision((v) => v + 1)}>Retry</Button>}>{error}</Alert>}
+    {stats && <>
+      {stats.professional_status !== 'active' && <Alert severity="warning">Your professional status is {stats.professional_status.replaceAll('_', ' ')}. Clinical actions require an active professional status; contact administration if this needs updating.</Alert>}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 2 }}>
+        {[["Today's Appointments", stats.today_appointments], ['Patients Consulted', stats.patients_consulted], ['Pending Laboratory Results', stats.pending_laboratory], ['Upcoming Appointments', stats.upcoming_appointments]].map(([title, value]) => <DashboardCard key={title} title={title} value={Number(value).toLocaleString()} />)}
+      </Box>
+      <Stack direction="row" sx={{ gap: 1, flexWrap: 'wrap' }}><Button component={Link} to="/doctor/appointments" variant="contained">Open appointments</Button><Button component={Link} to="/doctor/consultations">Consultation records</Button><Button component={Link} to="/doctor/schedules">Manage schedule</Button><Button onClick={() => setRevision((v) => v + 1)}>Refresh</Button></Stack>
+      <Card><CardContent><Typography variant="h6" sx={{ mb: 2 }}>My Appointments by Status</Typography><Box sx={{ height: 260 }}>
+        {stats.appointments_by_status.length ? <ResponsiveContainer width="100%" height="100%"><BarChart data={stats.appointments_by_status}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="name" /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="count" fill={brandColors.teal.main} radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer> : <Typography color="text.secondary">No appointments assigned yet.</Typography>}
+      </Box></CardContent></Card>
+      <DataTable title="Assigned Appointment Queue" data={stats.recent_appointments.map((row) => ({ ...row, patient_name: row.patient?.user?.name }))} columns={[
+        { id: 'appointment_number', label: 'Appointment' }, { id: 'patient_name', label: 'Patient', render: (row) => row.patient?.user?.name },
+        { id: 'appointment_date', label: 'Date', render: (row) => row.appointment_date?.slice(0, 10) }, { id: 'appointment_time', label: 'Time' },
+        { id: 'status', label: 'Status', render: (row) => <StatusChip status={row.status} /> },
+      ]} footerCaption="Open My Appointments to confirm requests, review patient history, or record a consultation." />
+    </>}
+  </Stack>;
+}

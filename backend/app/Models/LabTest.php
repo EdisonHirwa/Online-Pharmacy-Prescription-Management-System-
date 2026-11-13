@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LabTest extends Model
@@ -27,5 +28,15 @@ class LabTest extends Model
     public function test_type(): BelongsTo
     {
         return $this->belongsTo(LabTestType::class, 'test_type_id');
+    }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(LabReport::class);
+    }
+
+    public function consultation(): BelongsTo
+    {
+        return $this->belongsTo(Consultation::class);
     }
 }

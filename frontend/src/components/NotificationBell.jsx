@@ -101,7 +101,7 @@ export const NotificationBell = () => {
           vertical: 'top',
           horizontal: 'right',
         }}
-        PaperProps={{
+        slotProps={{ paper: {
           sx: {
             width: 360,
             maxHeight: 460,
@@ -110,7 +110,7 @@ export const NotificationBell = () => {
             border: '1px solid',
             borderColor: 'divider',
           },
-        }}
+        } }}
       >
         <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'secondary.main' }}>

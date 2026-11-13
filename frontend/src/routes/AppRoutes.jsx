@@ -24,10 +24,11 @@ import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminWorkspace from '../pages/admin/AdminWorkspace';
 import ProfilePage from '../pages/shared/ProfilePage';
 import PatientsPage from '../pages/admin/PatientsPage';
-import DoctorsPage from '../pages/admin/DoctorsPage';
 import BillingPage from '../pages/admin/BillingPage';
 
 import DoctorDashboard from '../pages/doctor/DoctorDashboard';
+import DoctorWorkspace from '../pages/doctor/DoctorWorkspace';
+import DoctorProfilePage from '../pages/doctor/DoctorProfilePage';
 import PatientDashboard from '../pages/patient/PatientDashboard';
 import LabDashboard from '../pages/lab/LabDashboard';
 import PharmacyDashboard from '../pages/pharmacy/PharmacyDashboard';
@@ -102,11 +103,13 @@ export const AppRoutes = () => {
       >
         <Route index element={<Navigate to="/doctor/dashboard" replace />} />
         <Route path="dashboard" element={<DoctorDashboard />} />
-        <Route path="schedules" element={<DoctorsPage />} />
-        <Route path="appointments" element={<DoctorDashboard />} />
-        <Route path="patients" element={<PatientsPage />} />
-        <Route path="prescriptions" element={<PharmacyDashboard />} />
-        <Route path="lab-requests" element={<LabDashboard />} />
+        <Route path="schedules" element={<DoctorWorkspace key="doctor-schedules" resource="schedules" />} />
+        <Route path="appointments" element={<DoctorWorkspace key="doctor-appointments" resource="appointments" />} />
+        <Route path="patients" element={<DoctorWorkspace key="doctor-patients" resource="patients" />} />
+        <Route path="consultations" element={<DoctorWorkspace key="doctor-consultations" resource="consultations" />} />
+        <Route path="prescriptions" element={<DoctorWorkspace key="doctor-prescriptions" resource="prescriptions" />} />
+        <Route path="lab-requests" element={<DoctorWorkspace key="doctor-labs" resource="lab-requests" />} />
+        <Route path="profile" element={<DoctorProfilePage />} />
       </Route>
 
       {/* PATIENT PORTAL */}

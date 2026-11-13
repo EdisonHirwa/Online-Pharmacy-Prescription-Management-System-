@@ -1,6 +1,6 @@
 # MediCare Hospital — Laravel API
 
-Laravel 13, Sanctum, PHP 8.3+, and MySQL. The Admin portal uses real database records. Other role-specific clinical workflows will be integrated in subsequent phases.
+Laravel 13, Sanctum, PHP 8.3+, and MySQL. The Admin and Doctor portals use real database records. Patient, laboratory processing, and pharmacy dispensing portals remain for subsequent phases.
 
 ## Installation
 
@@ -31,7 +31,24 @@ Set `FRONTEND_URL=http://localhost:5173` for password recovery links. Configure 
 - Database statistics, operational reports, CSV/PDF exports, login attempts, audit activity, and authorized laboratory file downloads.
 - Laravel events/listeners and Notifications persist workflow notifications for the affected patient. Notifications and dashboard figures are polled every 30 seconds in the frontend.
 
-Invoice charges are entered by Admin; automatic billing from clinical dispensing and laboratory completion remains part of the forthcoming clinical workflows. Payments record cash, card, and mobile money transactions; no payment gateway is connected. Historical financial records cannot be deleted. Records with clinical dependencies are retained. Occupied beds cannot be edited until discharge.
+Admin can enter invoice charges. Doctor consultation completion and laboratory requests now create linked charges automatically. Pharmacy dispensing charges remain part of the upcoming pharmacy workflow. Payments record cash, card, and mobile money transactions; no payment gateway is connected. Historical financial records cannot be deleted. Records with clinical dependencies are retained. Occupied beds cannot be edited until discharge.
+
+## Doctor functionality
+
+Create an active user with role `doctor` through Admin → Users & Access, then link that user to a doctor profile under Doctors & Schedules. Sign in using that account's email and password. A doctor account without a linked profile receives a configuration error rather than access to other doctors' data.
+
+- Database-backed dashboard, own schedules, assigned appointments, patient history, consultation records, prescriptions, laboratory requests/results, and professional/account profiles.
+- Laravel policies restrict records to their owning doctor. Patient history requires an assigned pending/confirmed/completed appointment or a previous consultation with that doctor. Completed laboratory reports for patients in that care relationship are downloaded through authorized endpoints.
+- Confirm/reject/cancel assigned appointments. Finalize confirmed appointments dated today or earlier with diagnosis, notes, treatment recommendations, and an optional follow-up date. Finalized consultations are preserved, not overwritten.
+- Issue multi-medicine prescriptions using server-managed prices. Update or cancel only before dispensing activity; prescribing does not deduct inventory. Pharmacy users are notified.
+- Request multiple active laboratory test types linked to a consultation. Active duplicate requests are rejected. Cancel only unassigned requests; paid invoice charges must first be resolved by administration. Lab staff and the patient are notified.
+- Consultation and laboratory charges are added transactionally to an outstanding appointment invoice. If an earlier invoice is paid, new charges use a separate invoice. Zero-fee services create no charge. Cancellation retains a zero-valued invoice line rather than deleting financial history.
+- Add relevant allergy and medical history entries for authorized patients. Access and clinical mutations are audited without copying clinical notes into audit descriptions.
+- Doctors may update their biography and room number. Administrative assignments, license, fees, and professional status remain controlled by Admin.
+
+Doctor role defaults allow schedule management and clinical work when no custom permission list is configured (`null` or `[]`). A nonempty custom list limits writes to the selected `manage_schedules` / `manage_consultations` permissions. Professional status must be `active` for clinical writes; schedule management remains available while on leave.
+
+Doctor routes are under `/api/doctor`: `dashboard`, `profile`, `options`, paginated `schedules`, `appointments`, `patients`, `consultations`, `prescriptions`, and `lab-requests`. Schedule CRUD uses its resource endpoints. `POST consultations` finalizes an appointment; `POST/PUT prescriptions` issues/updates prescriptions; `POST lab-requests` accepts a consultation and `test_type_ids[]`. Cancellation endpoints use `POST prescriptions/{id}/cancel` and `POST lab-requests/{id}/cancel`. `GET lab-reports/{id}/download` and `GET prescriptions/{id}/download` serve authorized files. Patient allergy/history entries use `POST patients/{id}/allergies` and `POST patients/{id}/medical-history`.
 
 ## API
 

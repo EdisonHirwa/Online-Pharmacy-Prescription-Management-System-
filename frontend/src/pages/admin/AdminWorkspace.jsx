@@ -103,6 +103,7 @@ export default function AdminWorkspace({ resources = ['users'], reporting = fals
       api.get(`/admin/${resource}/${row.id}`).then((response) => setDialog((current) => current?.row?.id === row.id ? { ...current, row: response.data.data } : current)).catch((e) => setDialogError(errorMessage(e)));
     }
     setFieldErrors({}); setDialogError('');
+    if (resource === 'doctors' && kind === 'edit') loadOptions().catch((e) => setDialogError(errorMessage(e)));
     const initial = {};
     const specs = kind === 'edit' ? fields : workflowFields;
     Object.entries(specs).forEach(([key, spec]) => {
@@ -186,14 +187,15 @@ export default function AdminWorkspace({ resources = ['users'], reporting = fals
       items = (options[spec.resource] || []).filter((o) => (dialog.kind !== 'admit' || spec.resource !== 'beds' || o.status === 'available') && (!spec.role || o.role === spec.role) && (key !== 'specialization_id' || !form.department_id || Number(o.department_id) === Number(form.department_id)));
     }
     const select = ['select', 'reference', 'multiselect'].includes(spec.type);
-    return <TextField key={key} disabled={(key === 'user_id' && Boolean(dialog.row) && dialog.kind === 'edit') || (key === 'patient_id' && dialog.kind === 'reschedule')} fullWidth select={select} label={label(key)} required={!spec.optional && !(key === 'password' && dialog.row)}
+    return <TextField key={key} disabled={(key === 'user_id' && Boolean(dialog.row) && dialog.kind === 'edit') || (key === 'patient_id' && dialog.kind === 'reschedule') || (key === 'specialization_id' && !form.department_id)} fullWidth select={select} label={label(key)} required={!spec.optional && !(key === 'password' && dialog.row)}
       value={form[key] ?? (spec.type === 'multiselect' ? [] : '')}
       type={['email', 'password', 'date', 'time'].includes(spec.type) ? spec.type : ['money', 'integer'].includes(spec.type) ? 'number' : 'text'}
       multiline={spec.type === 'textarea'} minRows={spec.type === 'textarea' ? 2 : undefined}
       slotProps={{ inputLabel: { shrink: ['date', 'time'].includes(spec.type) ? true : undefined }, htmlInput: { step: spec.type === 'money' ? '0.01' : spec.type === 'integer' ? '1' : undefined }, select: spec.type === 'multiselect' ? { multiple: true } : {} }}
-      error={Boolean(fieldErrors[key])} helperText={fieldErrors[key]?.[0] || (key === 'user_id' ? `Create a ${spec.role} user in Users & Access first.` : key === 'password' && dialog.row ? 'Leave blank to retain the password. Account edits revoke existing sessions.' : '')}
+      error={Boolean(fieldErrors[key])} helperText={fieldErrors[key]?.[0] || (key === 'specialization_id' ? (!form.department_id ? 'Choose a department first.' : items.length ? 'Select a specialization for this department.' : 'No specializations for this department. Add one in Organization & Services → Specializations.') : key === 'user_id' ? `Create a ${spec.role} user in Users & Access first.` : key === 'password' && dialog.row ? 'Leave blank to retain the password. Account edits revoke existing sessions.' : '')}
       onChange={(e) => setForm({ ...form, [key]: e.target.value, ...(key === 'department_id' ? { specialization_id: '' } : {}) })}>
       {select && spec.type !== 'multiselect' && <MenuItem value="">Select {label(key).toLowerCase()}</MenuItem>}
+      {key === 'specialization_id' && form.department_id && items.length === 0 && <MenuItem disabled>No specializations available for this department</MenuItem>}
       {select && items.map((o) => <MenuItem key={o.id} value={o.id}>{o.label}</MenuItem>)}
     </TextField>;
   };

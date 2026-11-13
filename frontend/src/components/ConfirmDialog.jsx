@@ -26,14 +26,14 @@ export const ConfirmDialog = ({
     <Dialog
       open={open}
       onClose={loading ? undefined : onClose}
-      PaperProps={{
+      slotProps={{ paper: {
         sx: {
           borderRadius: 3,
           p: 1,
           maxWidth: 440,
           width: '100%',
         },
-      }}
+      } }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pb: 1 }}>
         {isDestructive && (

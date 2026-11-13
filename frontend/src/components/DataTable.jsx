@@ -94,13 +94,13 @@ export const DataTable = ({
                 setSearchQuery(e.target.value);
                 setPage(0);
               }}
-              InputProps={{
+              slotProps={{ input: {
                 startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
                   </InputAdornment>
                 ),
-              }}
+              } }}
               sx={{
                 width: { xs: '100%', sm: 260 },
                 '& .MuiOutlinedInput-root': { borderRadius: 2 },

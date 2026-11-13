@@ -19,7 +19,15 @@ Tables provide server-side search, filters, sorting, pagination, detail views, a
 
 Create a user with the correct role before linking its patient or doctor profile. Inventory begins at zero; use Adjust stock to record additions and deductions. Private laboratory reports download through the protected API.
 
-The teal, navy, and coral design and light/dark toggle are retained. Doctor, Patient, Laboratory Technician, and Pharmacist interfaces remain for subsequent role-by-role backend integration; the completed Admin routes use the shared AdminWorkspace instead of the earlier mock pages.
+The teal, navy, and coral design and light/dark toggle are retained. Patient, Laboratory Technician, and Pharmacist interfaces remain for subsequent role-by-role backend integration; the completed Admin routes use the shared AdminWorkspace instead of the earlier mock pages.
+
+## Doctor portal
+
+Sign in with a Doctor user linked to its professional profile by Admin. Doctor routes now have dedicated pages for dashboard statistics, weekly schedules, assigned appointments, patient history, consultations, prescriptions, laboratory requests/results, and profiles.
+
+Start with My Appointments: review history, confirm pending requests, then consult a confirmed appointment. Finalization requires explicit confirmation and opens the completed consultation with actions to issue a prescription or request tests. Prescriptions support multiple medicines and PDF downloads; laboratory reports download from protected endpoints. Changes persist through Laravel. Forms show validation errors and the tables provide server-side search, filters, sorting, and pagination. Dashboard and tables refresh every 30 seconds.
+
+Doctor account activation, professional assignments, license, consultation fee, and professional status are managed by Admin. Doctors can change their own contact information, password, biography, room number, and permitted schedules. Clinical write controls reflect backend permissions and professional status; Laravel independently enforces authorization.
 
 ## Build
 

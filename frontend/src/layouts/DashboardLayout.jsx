@@ -59,8 +59,10 @@ const ROLE_NAV_ITEMS = {
     { label: 'My Schedule', path: '/doctor/schedules' },
     { label: 'My Appointments', path: '/doctor/appointments' },
     { label: 'Patient History', path: '/doctor/patients' },
+    { label: 'Consultations', path: '/doctor/consultations' },
     { label: 'Prescriptions', path: '/doctor/prescriptions' },
     { label: 'Lab Requests', path: '/doctor/lab-requests' },
+    { label: 'My Profile', path: '/doctor/profile' },
   ],
   patient: [
     { label: 'Dashboard', path: '/patient/dashboard' },
@@ -279,14 +281,14 @@ export const DashboardLayout = () => {
               placeholder="Search patients…"
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && role === 'admin') navigate(`/admin/patients?search=${encodeURIComponent(globalSearch)}`); }}
-              InputProps={{
+              onKeyDown={(e) => { if (e.key === 'Enter' && ['admin','doctor'].includes(role)) navigate(`/${role}/patients?search=${encodeURIComponent(globalSearch)}`); }}
+              slotProps={{ input: {
                 startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
                   </InputAdornment>
                 ),
-              }}
+              } }}
               sx={{
                 display: { xs: 'none', sm: 'block' },
                 width: 240,
@@ -364,7 +366,7 @@ export const DashboardLayout = () => {
                 </Typography>
               </Box>
               <Divider />
-              <MenuItem onClick={() => { setAvatarAnchor(null); navigate(role === 'admin' ? '/admin/profile' : `/${role}/dashboard`); }}>
+              <MenuItem onClick={() => { setAvatarAnchor(null); navigate(['admin','doctor'].includes(role) ? `/${role}/profile` : `/${role}/dashboard`); }}>
                 <PersonIcon sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} /> Profile Info
               </MenuItem>
               <MenuItem onClick={handleLogout} sx={{ color: brandColors.coral.main }}>

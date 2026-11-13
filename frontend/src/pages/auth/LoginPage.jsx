@@ -92,7 +92,7 @@ export const LoginPage = () => {
       >
         <CardContent sx={{ p: 2 }}>
           {/* Logo & Header */}
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1 }}>
             <Box
               sx={{
                 width: 36,
@@ -154,13 +154,13 @@ export const LoginPage = () => {
                 {...register('email')}
                 error={Boolean(errors.email)}
                 helperText={errors.email?.message}
-                InputProps={{
+                slotProps={{ input: {
                   startAdornment: (
                     <InputAdornment position="start">
                       <Email sx={{ color: 'primary.main', fontSize: 20 }} />
                     </InputAdornment>
                   ),
-                }}
+                } }}
               />
 
               <TextField
@@ -171,7 +171,7 @@ export const LoginPage = () => {
                 {...register('password')}
                 error={Boolean(errors.password)}
                 helperText={errors.password?.message}
-                InputProps={{
+                slotProps={{ input: {
                   startAdornment: (
                     <InputAdornment position="start">
                       <Lock sx={{ color: 'primary.main', fontSize: 20 }} />
@@ -188,10 +188,10 @@ export const LoginPage = () => {
                       </IconButton>
                     </InputAdornment>
                   ),
-                }}
+                } }}
               />
 
-              <Stack direction="row" justifyContent="flex-end">
+              <Stack direction="row" sx={{ justifyContent: 'flex-end' }}>
                 <Button
                   component={RouterLink}
                   to="/forgot-password"

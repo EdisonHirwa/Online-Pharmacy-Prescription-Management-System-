@@ -155,7 +155,7 @@ class AdminWorkflowService
             if ($date->isPast()) {
                 throw ValidationException::withMessages(['appointment_time' => 'Choose a future appointment time.']);
             }
-            $schedule = DoctorSchedule::where('doctor_id', $doctor->id)->where('day_of_week', $date->format('l'))->where('is_available', true)->where('start_time', '<=', $data['appointment_time'])->where('end_time', '>', $data['appointment_time'])->first();
+            $schedule = DoctorSchedule::where('doctor_id', $doctor->id)->where('day_of_week', $date->format('l'))->where('is_available', true)->whereTime('start_time', '<=', $data['appointment_time'].':00')->whereTime('end_time', '>', $data['appointment_time'].':00')->first();
             if (! $schedule) {
                 abort(409, 'The doctor has no available schedule at this time.');
             }
@@ -174,6 +174,7 @@ class AdminWorkflowService
             $record = $record ? tap($record, fn ($record) => $record->update($data)) : Appointment::create($data + ['appointment_number' => 'APT-'.Str::ulid(), 'status' => 'confirmed']);
             AuditService::record($id ? 'appointment_rescheduled' : 'appointment_booked', 'appointments', $record->id);
             HospitalActivity::dispatch($record->patient->user, 'Appointment confirmed', 'Your appointment has been confirmed.', 'appointment');
+            HospitalActivity::dispatch($record->doctor->user, 'Appointment assigned', 'An appointment has been booked or rescheduled in your consultation schedule.', 'appointment');
 
             return $record;
         }, 3);
@@ -193,6 +194,7 @@ class AdminWorkflowService
             $record->update($data);
             AuditService::record('appointment_'.$data['status'], 'appointments', $id);
             HospitalActivity::dispatch($record->patient->user, 'Appointment updated', 'Your appointment status is now '.$data['status'].'.', 'appointment');
+            HospitalActivity::dispatch($record->doctor->user, 'Appointment updated', 'An assigned appointment status is now '.$data['status'].'.', 'appointment');
 
             return $record;
         }, 3);

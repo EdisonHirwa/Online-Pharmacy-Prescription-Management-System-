@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
         foreach (['General Medicine', 'Pediatrics', 'Surgery', 'Maternity', 'Dentistry', 'Laboratory', 'Pharmacy'] as $name) {
             Department::firstOrCreate(['name' => $name], ['status' => 'active']);
         }
+        $this->call(SpecializationSeeder::class);
+
         foreach (['General', 'Maternity', 'Pediatric'] as $name) {
             Ward::firstOrCreate(['name' => $name], ['ward_type' => $name, 'status' => 'active']);
         }
