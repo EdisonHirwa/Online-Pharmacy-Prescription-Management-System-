@@ -1,4 +1,4 @@
-# MediCare Hospital — React frontend
+# Online Pharmacy — React frontend
 
 React 19, Material UI, Recharts, React Router, React Hook Form, Yup, Axios, and Vite.
 
@@ -19,7 +19,7 @@ Tables provide server-side search, filters, sorting, pagination, detail views, a
 
 Create a user with the correct role before linking its patient or doctor profile. Inventory begins at zero; use Adjust stock to record additions and deductions. Private laboratory reports download through the protected API.
 
-The teal, navy, and coral design and light/dark toggle are retained. Laboratory Technician and Pharmacist interfaces remain for subsequent role-by-role backend integration; the completed Admin routes use the shared AdminWorkspace instead of the earlier mock pages.
+The interface uses teal, navy, and coral with a light/dark toggle. All five role portals connect to the Laravel backend; Admin routes use the shared AdminWorkspace.
 
 ## Doctor portal
 

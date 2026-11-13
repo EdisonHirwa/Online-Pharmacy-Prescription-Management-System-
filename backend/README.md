@@ -1,4 +1,4 @@
-# MediCare Hospital — Laravel API
+# Online Pharmacy — Laravel API
 
 Laravel 13, Sanctum, PHP 8.3+, and MySQL. The Admin, Doctor, Patient, Laboratory Technician, and Pharmacist portals use real database records.
 
